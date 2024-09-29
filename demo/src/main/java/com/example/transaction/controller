@@ -1,0 +1,28 @@
+package com.example.transaction.controller;
+
+import com.example.transaction.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class AuthenticationController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @PostMapping("/authenticate")
+    public String generateToken(@RequestParam String username, @RequestParam String password) throws Exception {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (Exception ex) {
+            throw new Exception("Invalid username/password");
+        }
+        return jwtUtil.generateToken(username); // Return the generated JWT token
+    }
+}

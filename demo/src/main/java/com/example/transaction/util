@@ -1,0 +1,42 @@
+package com.example.transaction.util;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+
+    private String secretKey = "mysecretkey"; // This is the secret key for signing JWT tokens
+
+    // Method to generate a JWT token
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username) // Set the subject as the username
+                .setIssuedAt(new Date()) // Set the current date as the issued date
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Token expires after 10 hours
+                .signWith(SignatureAlgorithm.HS256, secretKey) // Use HMAC SHA-256 to sign the token
+                .compact();
+    }
+
+    // Method to validate a JWT token and extract the username
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    // Method to check if the token is expired
+    public Boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
+    }
+
+    // Helper method to extract all claims from the token
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+    }
+}
